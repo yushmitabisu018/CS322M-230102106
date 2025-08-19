@@ -1,3 +1,5 @@
+# Problem 1: Mealy Sequence Detector (1101)
+
 ## State Diagram
 ![State Diagram](https://github.com/yushmitabisu018/CS322M-230102106/blob/main/fsm-assignments/problem1_seqdet/figures/1st_state%20Diagram.jpeg)  
 
