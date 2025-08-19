@@ -1,5 +1,5 @@
 ## State Diagram
-![State Diagram](figures/1st_state_Diagram.jpeg)  
+![State Diagram](https://github.com/yushmitabisu018/CS322M-230102106/blob/main/fsm-assignments/problem1_seqdet/figures/1st_state%20Diagram.jpeg)  
 
 - **States**:  
   - `S0`: Initial state (no input detected)  
