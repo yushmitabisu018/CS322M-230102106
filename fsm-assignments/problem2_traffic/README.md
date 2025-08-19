@@ -39,3 +39,37 @@
    iverilog -o sim.out tb_traffic_light.v traffic_light.v
    vvp sim.out
    gtkwave dump.vcd
+
+# Tick Generation and Verification
+
+## Clock and Tick Settings
+- **System clock (clk):** 50 MHz  
+- **Chosen tick rate (TICK_HZ):** 1 Hz  
+  - Means `tick=1` occurs **once every 1 second**.  
+- **Prescaler counter value:**  
+  - Rolls over every `CLK_FREQ_HZ / TICK_HZ = 50,000,000 / 1 = 50,000,000` cycles.  
+  - At rollover, `tick` is asserted high for exactly **1 clock cycle**.
+
+## Why Tick?
+- FSM always runs on the **fast clk (50 MHz)**.  
+- FSM state transitions depend only on **tick pulses**, not raw clock cycles.  
+- Easier to tune traffic-light timings (e.g., change TICK_HZ without touching FSM).  
+- Simulation becomes faster and waveform viewing clearer.  
+
+## Verification of Tick
+1. In the testbench, we monitored the `tick` signal.  
+2. Confirmed that `tick` pulses are **1-cycle wide** and occur once per second.  
+3. FSM durations:  
+   - Red: **5 ticks** → 5 seconds  
+   - Green: **2 ticks** → 2 seconds  
+   - Yellow: **5 ticks** → 5 seconds  
+   - Green: **2 ticks** → 2 seconds  
+4. Waveform (GTKWave) showed correct phase lengths: **5/2/5/2 seconds**.  
+
+## Example Check in Simulation
+- At simulation time **5 seconds**, FSM transitioned Red → Green.  
+- At **7 seconds**, FSM transitioned Green → Yellow.  
+- At **12 seconds**, FSM transitioned Yellow → Green.  
+- At **14 seconds**, FSM transitioned Green → Red.  
+
+This confirmed the **5/2/5/2 tick-based durations** were working correctly.
