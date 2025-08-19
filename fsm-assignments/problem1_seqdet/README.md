@@ -44,6 +44,6 @@
 
 1. Compile design & testbench:  
    ```bash
-   iverilog -o sim_p1 tb_seq_detect_mealy.v seq_detect_mealy.v
+   iverilog -o sim.out tb_seq_detect_mealy.v seq_detect_mealy.v
    vvp sim.out
    gtkwave dump.vcd
