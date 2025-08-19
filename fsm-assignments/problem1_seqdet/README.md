@@ -17,7 +17,7 @@
 ---
 
 ## Waveform
-![Waveform](figures/sequence_waveform.png)  
+![Waveform](https://github.com/yushmitabisu018/CS322M-230102106/blob/main/fsm-assignments/problem1_seqdet/figures/sequence_waveform.jpeg)  
 
 - **Signals Observed**:  
   - `clk` → clock signal  
