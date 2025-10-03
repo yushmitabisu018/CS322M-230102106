@@ -20,39 +20,3 @@ This test plan ensures the correct functionality of all 10 custom RVX10 single-c
 | **ABS** | 0000011/000 | 0x8000_0000 | 0x80000000 | x0 | 0x8000_0000 | [cite_start]ABS overflow: $\text{ABS}(\text{INT\_MIN})=\text{INT\_MIN}$. |
 
 ***
-
-## 2. `docs/README.md` (How to Run)
-
-This file provides instructions for your simulator/test environment.
-
-```markdown
-# CS322M RV32I Core with RVX10 Extension
-
-This repository contains the single-cycle RISC-V RV32I core implementation with the custom RVX10 instruction set extension (CUSTOM-0, opcode 0x0B).
-
-## Deliverables
-
-* [cite_start]`src/riscvsingle.sv`: Modified core RTL supporting RVX10 decode/ALU[cite: 97].
-* `docs/ENCODINGS.md`: Full instruction encoding table and a manual encoding example.
-* `docs/TESTPLAN.md`: Per-op inputs and expected results for verification.
-* [cite_start]`tests/rvx10.hex`: The self-checking test program image for simulation[cite: 100].
-
-## Build and Run Instructions
-
-Assuming a standard Verilog/SystemVerilog simulation environment (e.g., Icarus Verilog or VCS):
-
-1.  **Simulation Command:**
-    Compile the core and the provided testbench (`testbench.sv` - assumed to be provided by the course).
-    ```bash
-    # Example using Icarus Verilog (iverilog)
-    iverilog -o sim.vvp src/riscvsingle.sv testbench.sv
-    ```
-
-2.  **Run Simulation:**
-    Execute the compiled simulation, reading the memory image from `tests/rvx10.hex`.
-    ```bash
-    vvp sim.vvp
-    ```
-
-3.  **Success Criterion:**
-    [cite_start]The simulation will print **"Simulation succeeded"** if the final instruction correctly stores the value $\mathbf{25}$ to memory address $\mathbf{100}$[cite: 10, 106].
