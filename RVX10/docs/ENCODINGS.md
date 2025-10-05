@@ -12,16 +12,16 @@ All RVX10 instructions use the CUSTOM-0 opcode (0x0B) and the R-type format.
 
 | Instr | opcode (hex) | funct7 (bin) | funct3 (bin) | rs2 usage | Operation |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| ANDN | 0x0B | 0000000 | 000 | rs2 | $rd = rs1\ \&\ \sim rs2$ |
-| ORN | 0x0B | 0000000 | 001 | rs2 | $rd = rs1\ |\ \sim rs2$ |
-| XNOR | 0x0B | 0000000 | 010 | rs2 | $rd = \sim(rs1\ \oplus\ rs2)$ |
-| MIN | 0x0B | 0000001 | 000 | rs2 | Signed Min: $rd = \min(rs1, rs2)$ |
-| MAX | 0x0B | 0000001 | 001 | rs2 | Signed Max: $rd = \max(rs1, rs2)$ |
-| **MINU** | **0x0B** | **0000001** | **010** | **rs2** | Unsigned Min: $rd = \min_{U}(rs1, rs2)$ |
-| **MAXU** | **0x0B** | **0000001** | **011** | **rs2** | Unsigned Max: $rd = \max_{U}(rs1, rs2)$ |
-| ROL | 0x0B | 0000010 | 000 | rs2[4:0] for shamt | Rotate Left: $rd = rs1\ \text{rotate\_left}\ rs2$ |
-| ROR | 0x0B | 0000010 | 001 | rs2[4:0] for shamt | Rotate Right: $rd = rs1\ \text{rotate\_right}\ rs2$ |
-| ABS | 0x0B | 0000011 | 000 | ignored (set rs2=x0) | Absolute Value: $rd = |rs1|$ |
+| ANDN | 0x0B | 0000000 | 000 | rs2 | `rd = rs1 & ~rs2` |
+| ORN | 0x0B | 0000000 | 001 | rs2 | `rd = rs1 \| ~rs2` |
+| XNOR | 0x0B | 0000000 | 010 | rs2 | `rd = ~(rs1 ^ rs2)` |
+| MIN | 0x0B | 0000001 | 000 | rs2 | `rd = (rs1 < rs2) ? rs1 : rs2` |
+| MAX | 0x0B | 0000001 | 001 | rs2 | `rd = (rs1 > rs2) ? rs1 : rs2` |
+| **MINU** | **0x0B** | **0000001** | **010** | **rs2** | `rd = (rs1 < rs2) ? rs1 : rs2` |
+| **MAXU** | **0x0B** | **0000001** | **011** | **rs2** | `rd = (rs1 > rs2) ? rs1 : rs2` |
+| ROL | 0x0B | 0000010 | 000 | rs2[4:0] for shamt | `rd = (rs1 << rs2[4:0]) \| (rs1 >> (32 - rs2[4:0]))` |
+| ROR | 0x0B | 0000010 | 001 | rs2[4:0] for shamt | `rd = (rs1 >> rs2[4:0]) \| (rs1 << (32 - rs2[4:0]))` |
+| ABS | 0x0B | 0000011 | 000 | ignored (set rs2=x0) | `rd = (rs1 < 0) ? -rs1 : rs1` |
 
 ## Corrected Manual Encoding Example: $\text{MAXU}$ x12, x10, x11
 
