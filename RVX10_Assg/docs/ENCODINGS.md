@@ -43,4 +43,4 @@ $$\text{inst} = (\text{funct7}\ll25) | (\text{rs2}\ll20) | (\text{rs1}\ll15) | (
 
 $$\text{inst} = 0\text{x02000000} | 0\text{x00B00000} | 0\text{x00050000} | 0\text{x00003000} | 0\text{x00000600} | 0\text{x0000000B}$$
 
-**32-bit Hex Code (Corrected):** $\mathbf{0\text{x02B5360B}}$
+**32-bit Hex Code:** $\mathbf{0\text{x02B5360B}}$
