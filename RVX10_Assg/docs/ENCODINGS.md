@@ -29,9 +29,7 @@ Instruction: $\text{MAXU}$ x12, x10, x11. ($rd=x12$, $rs1=x10$, $rs2=x11$)
 
 | Field | funct7 | rs2 | rs1 | funct3 | rd | opcode |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Value (Decimal) | 1 | 11 | 10 | 3 | 12 | 11 |
-| Value (Binary) | 0000001 | 01011 | 01010 | 011 | 01100 | 0001011 |
-| Value (Hex) | 0x01 | 0x0B | 0x0A | 0x3 | 0x0C | 0x0B |
+| Value | 0000001 | 01011 | 01010 | 011 | 01100 | 0001011 |
 
 The 32-bit machine code is calculated as:
 $$\text{inst} = (\text{funct7}\ll25) | (\text{rs2}\ll20) | (\text{rs1}\ll15) | (\text{funct3}\ll12) | (\text{rd}\ll7) | \text{opcode}$$
