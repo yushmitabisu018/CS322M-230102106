@@ -47,8 +47,3 @@ All RVX10 instructions use the **CUSTOM-0 opcode (0001011)**.
 5. At the end: `li x10, 25 ; li x11, 100 ; sw x10, 0(x11)` — store 25 at memory address 100 to signal success.
 
 ---
-
-If you want, I can:
-* produce a ready-to-run `.s` file that implements the above checks and writes `25` to address `100`, or  
-* generate the `.word` list (machine words) for each RVX10 instruction used in the tests so you can paste them into your `rvx10.hex` / test image.
-
