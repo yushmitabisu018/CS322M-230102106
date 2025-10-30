@@ -1,112 +1,109 @@
-# RVX10-P — Pipelined RISC-V Processor (Short Project Report)
+# RVX10-P: 5-Stage Pipelined RISC-V Processor (RV32I + RVX10 Extension)
 
-**Project:** RV32I + RVX10 (5-stage pipelined CPU)    
-**Author:** Yushmita Bisu
-
-
-## Summary of this run
-
-* Testbench binary: `pipeline_tb`
-* Instruction memory file: `tests/rvx10_pipeline.hex`
-* Key run observations: forwarding working, expected stores observed, simulation finished successfully (self-check passed).
-* Note: a small warning about the instruction file length was produced — see *Warnings*.
+**Name:** Yushmita Bisu (230102106)  
+**Institute:** IIT Guwahati  
+**Date:** October 2025  
 
 ---
 
-## Console output (relevant excerpts)
+## 1. Introduction
 
-```
-WARNING: src/riscvpipeline.sv:59: $readmemh(tests/rvx10_pipeline.hex): Not enough words in the file for the requested range [0:63].
-VCD info: dumpfile pipeline_tb.vcd opened for output.
-FORWARD: EX->EX for x2 at t=70000
-FORWARD: EX->EX for x3 at t=80000
-FORWARD: EX->EX for x4 at t=90000
-STORE @ 96 = 0x00000000 (t=135000)
-FORWARD: EX->EX for x5 at t=280000
-FORWARD: EX->EX for x5 at t=300000
-FORWARD: EX->EX for x5 at t=320000
-FORWARD: EX->EX for x5 at t=340000
-STORE @ 100 = 0x00000019 (t=365000)
-Simulation succeeded
-CHECKSUM (x28) = 4 (0x00000004)
-tb/tb_pipeline.sv:44: $finish called at 365000 (1ps)
-```
+This project implements **RVX10-P**, a five-stage pipelined RISC-V processor extending the base **RV32I** ISA with 10 **custom ALU instructions** (the RVX10 extension).  
+The processor has been designed using **SystemVerilog** and fully simulated with **Icarus Verilog**.  
+It demonstrates instruction-level parallelism through pipelining and efficient hazard handling using **forwarding** and **stall control**.
 
 ---
 
-## Pipeline metrics (final summary printed by TB)
+## 2. Design Overview
 
-* **Total cycles:** 34
-* **Instructions retired:** 26
-* **Stalls:** 0
-* **Flushes:** 0
-* **Branches taken:** 0
-* **Average CPI:** 1.31
-* **Utilization (instructions/cycle):** 76.5%
+### 2.1 Pipeline Stages
+RVX10-P follows the standard 5-stage RISC pipeline:
 
----
+| Stage | Name | Main Function |
+|--------|------|----------------|
+| IF | Instruction Fetch | Fetch instruction from instruction memory |
+| ID | Instruction Decode | Decode, read registers, generate control signals |
+| EX | Execute | Perform ALU operations and branch decisions |
+| MEM | Memory Access | Read/write data memory |
+| WB | Write Back | Write results to register file |
 
-## What these numbers mean (brief interpretation)
+Each stage is separated by pipeline registers (IF/ID, ID/EX, EX/MEM, MEM/WB) that hold intermediate data and control signals.
 
-* **Forwarding working correctly:** Multiple `FORWARD: EX->EX` messages indicate the forwarding unit successfully bypassed recent ALU results to dependent instructions — no extra cycles were needed for these RAW hazards.
-* **No load-use stalls:** `Stalls = 0` shows the test program did not trigger any load→use hazards that the hazard unit had to stall for.
-* **No branch penalties in this run:** `Branches = 0` and `Flushes = 0` — either the program contains no taken branches, or branches were arranged such that they were not taken during the observed run.
-* **Performance:** `Avg CPI = 1.31` — slightly higher than ideal (1.0) due to pipeline fill/drain overhead for a short program and the ratio of retired instructions to cycles (utilization 76.5%).
-* **Final correctness check:** The TB detected a store to address `100` with value `0x19` and printed `Simulation succeeded` and `CHECKSUM (x28) = 4` — this is your program’s self-check result (x28 holds `4` at the check point).
+### 2.2 Key Modules
 
----
-
-## Issues & suggestions
-
-1. **Instruction file warning**
-
-   ```
-   WARNING: $readmemh(tests/rvx10_pipeline.hex): Not enough words in the file for the requested range [0:63].
-   ```
-
-   * Means the imem was initialized for 64 words but the hex file has fewer entries. This is not fatal but you may want to:
-
-     * Pad the `.hex` file (append `00000013` NOPs) to reach 64 lines, **or**
-     * Reduce the imem size if you intentionally have fewer instructions.
-   * Padding example (append N NOPs): `printf '00000013\n%.0s' {1..38} >> tests/rvx10_pipeline.hex`
-
-2. **Small program length effects**
-
-   * Short tests exaggerate pipeline fill/drain overhead (raises CPI). Run longer instruction streams to measure steady-state CPI closer to ideal.
-
-3. **Checksum value**
-
-   * Your run produced `CHECKSUM (x28) = 4`. If you expected a different value, verify the test program and TB check condition. If `Simulation succeeded` was printed, the testbench considers the run successful based on its stored condition.
+| Module | Function |
+|---------|-----------|
+| **riscvpipeline.sv** | Top-level processor integrating datapath and control |
+| **controller.sv** | Decodes opcode and generates control signals |
+| **datapath.sv** | Implements all five pipeline stages |
+| **hazard_unit.sv** | Detects and handles load-use hazards |
+| **forwarding_unit.sv** | Resolves data hazards by forwarding ALU results |
+| **tb_pipeline.sv** | Self-checking testbench for verification |
 
 ---
 
-## Recommended next steps
+## 3. Hazard Detection and Forwarding
 
-* If you want a **cleaner run** with no warning, append NOPs to `tests/rvx10_pipeline.hex` until it contains 64 words.
+### 3.1 Data Hazards
+Data hazards arise when an instruction depends on the result of a previous one still in the pipeline.
 
-* To inspect internal signals and verify hazard/forwarding behaviour visually, open the VCD:
+**Solution:**
+- **Forwarding**: The forwarding unit detects dependencies and forwards ALU results from EX/MEM or MEM/WB to the EX stage.
+- **Priority**: MEM-stage data > WB-stage data.
 
-  ```bash
-  gtkwave pipeline_tb.vcd &
-  ```
+### 3.2 Load-Use Hazards
+When an instruction immediately follows a load using its result, forwarding isn’t enough because the data is available only after MEM.
 
-  Add these signals to the waveform view for debugging:
+**Solution:**
+The **hazard unit** detects such cases and stalls:
+- Stalls IF and ID stages (by asserting `stallF` and `stallD`)
+- Flushes the EX stage (`flushE`) to insert a NOP bubble
 
-  * `PC`, `IFID_Instr`, `IDEX_*` (rs1/rs2/rd, imm), `ALU_input_A/B`, `alu_result_e`
-  * `EXMEM_aluOut`, `EXMEM_writeData`, `MEMWB_*`
-  * `ForwardA`, `ForwardB`, `stallF`, `stallD`, `flushE`, `flushD`
-  * `GPR[28]` if exported / accessible (or add a TB display to print entire regfile at end)
-
-* To collect multiple runs or compare effects of changes, run and save output:
-
-  ```bash
-  vvp pipeline_tb | tee sim_output_run1.log
-  ```
+### 3.3 Control Hazards
+Branches are handled using a **predict-not-taken** approach.  
+If the branch is taken, the next fetched instruction is flushed from the pipeline.
 
 ---
 
-## One-page conclusion
+## 4. RVX10 Custom Instruction Set
 
-Your RVX10-P pipeline is functionally correct for the provided test: forwarding resolved data hazards, stores occurred at expected addresses, and the TB self-check passed (`Simulation succeeded`). The reported CPI (1.31) and utilization (76.5%) are reasonable for a short test with pipeline fill/drain overhead. Address the `$readmemh` warning by padding the hex file for cleaner initialization, and run longer tests to measure steady-state throughput.
+The **RVX10** extension adds 10 custom ALU operations under opcode `0001011`.  
+These include bitwise and arithmetic extensions such as ANDN, ORN, XNOR, MIN, MAX, and rotation operations.
+
+| Mnemonic | Description |
+|-----------|--------------|
+| ANDN | `rd = rs1 & ~rs2` |
+| ORN | `rd = rs1 \| ~rs2` |
+| XNOR | `rd = ~(rs1 ^ rs2)` |
+| MIN / MAX | Signed comparison |
+| MINU / MAXU | Unsigned comparison |
+| ROL / ROR | Rotate left/right |
+| ABS | Absolute value of `rs1` |
+
+These are implemented directly in the ALU using extended control codes and seamlessly integrated into the pipeline flow.
 
 ---
+
+## 5. Simulation Setup
+
+### 5.1 Testbench
+The self-checking **tb_pipeline.sv** provides:
+- Clock and reset generation  
+- Monitors for store operations and result verification  
+- Automatic success/failure messages  
+- Optional waveform dumping via `$dumpvars`
+
+### 5.2 Program Memory
+The test program (`tests/rvx10_pipeline.hex`) includes:
+- Arithmetic, logical, and custom RVX10 instructions  
+- Forwarding tests  
+- Store operations verifying memory write correctness
+
+---
+
+## 6. Simulation Results
+
+**Command Used:**
+```bash
+iverilog -g2012 -o pipeline_tb src/*.sv tb/tb_pipeline.sv
+vvp pipeline_tb
