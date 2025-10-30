@@ -65,7 +65,7 @@ Suggested workflow:
 
 ---
 
-## Performance summary (example)
+## Performance summary
 
 ```
 Cycles:         34
